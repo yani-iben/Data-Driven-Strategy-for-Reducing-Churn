@@ -1,0 +1,6 @@
+chapter_id,region,chapter_size
+CH_01,North,Large
+CH_02,South,Medium
+CH_03,East,Small
+CH_04,West,Large
+CH_05,North,Small
