@@ -1,0 +1,46 @@
+--Create the Cohort Retention View
+CREATE OR REPLACE VIEW view_cohort_retention AS
+WITH volunteer_cohorts AS (
+    SELECT 
+        volunteer_id,
+        DATE_TRUNC('month', join_date::DATE)::DATE AS cohort_month
+    FROM dim_volunteers
+),
+activity_months AS (
+    SELECT DISTINCT
+        volunteer_id,
+        DATE_TRUNC('month', date::DATE)::DATE AS activity_month
+    FROM fact_volunteer_activity
+),
+cohort_sizes AS (
+    SELECT cohort_month, COUNT(DISTINCT volunteer_id) AS total_started
+    FROM volunteer_cohorts
+    GROUP BY 1
+)
+SELECT 
+    c.cohort_month,
+    s.total_started,
+    EXTRACT(MONTH FROM AGE(a.activity_month, c.cohort_month)) AS months_since_joining,
+    COUNT(DISTINCT a.volunteer_id) AS active_volunteers,
+    ROUND(COUNT(DISTINCT a.volunteer_id)::NUMERIC / s.total_started * 100, 2) AS retention_rate
+FROM volunteer_cohorts c
+JOIN activity_months a ON c.volunteer_id = a.volunteer_id
+JOIN cohort_sizes s ON c.cohort_month = s.cohort_month
+WHERE a.activity_month >= c.cohort_month
+GROUP BY 1, 2, 3
+ORDER BY 1, 3;
+
+--Create the Regional Chapter Performance View
+CREATE OR REPLACE VIEW view_chapter_performance AS
+SELECT 
+    ch.chapter_id,
+    ch.region,
+    ch.chapter_size,
+    COUNT(DISTINCT v.volunteer_id) as total_assigned_volunteers,
+    ROUND(AVG(a.hours_served)::NUMERIC, 2) as avg_hours_per_event,
+    ROUND(AVG(a.engagement_score)::NUMERIC, 2) as avg_engagement_score,
+    COUNT(DISTINCT CASE WHEN (SELECT MAX(date::DATE) FROM fact_volunteer_activity WHERE volunteer_id = v.volunteer_id) < '2026-03-01'::DATE THEN v.volunteer_id END) as churned_count
+FROM dim_chapters ch
+LEFT JOIN dim_volunteers v ON ch.chapter_id = v.chapter_id
+LEFT JOIN fact_volunteer_activity a ON v.volunteer_id = a.volunteer_id
+GROUP BY ch.chapter_id, ch.region, ch.chapter_size;
