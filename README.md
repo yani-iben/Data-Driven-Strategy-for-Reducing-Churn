@@ -1,6 +1,7 @@
 # Strategic Volunteer Retention & Operational Analytics Platform
 
 **Live Dashboard Link:** [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_solid.svg)](https://yani-iben-data-driven-strategy-for-reducing-dashboardapp-rdl4xw.streamlit.app/)
+![Platform Executive Dashboard Preview](images/Dashboard_Preview.png)
 
 An enterprise-grade, full-stack data warehousing and intelligence application engineered to expose structural churn points, monitor cohort lifecycles, and deliver regional chapter accountability metrics. 
 
