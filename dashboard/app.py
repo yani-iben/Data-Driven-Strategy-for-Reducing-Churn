@@ -166,6 +166,9 @@ with tab2:
         
         with left_col:
             st.markdown("### Regional Risk Profiles")
+            
+            executive_slate_palette = ["#334155", "#64748B", "#94A3B8", "#CBD5E1"]
+            
             fig_bar = px.bar(
                 df_chapters,
                 x="region",
@@ -174,9 +177,14 @@ with tab2:
                 barmode="group",
                 title="Inactive Users (>60 Days) Grouped by Operational Footprint",
                 labels={"churned_count": "Flagged Churn Capacity", "region": "Geographic Zone"},
-                color_discrete_sequence=px.colors.qualitative.Slate
+                color_discrete_sequence=executive_slate_palette
             )
-            fig_bar.update_layout(plot_bgcolor="rgba(0,0,0,0)")
+            fig_bar.update_layout(
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                xaxis=dict(showgrid=False),
+                yaxis=dict(showgrid=True, gridcolor="#E2E8F0")
+            )
             st.plotly_chart(fig_bar, use_container_width=True)
             
         with right_col:
