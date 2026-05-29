@@ -91,9 +91,6 @@ with tab2:
         df_chapters['avg_engagement_score'] = pd.to_numeric(df_chapters['avg_engagement_score'], errors='coerce')
         df_chapters['churned_count'] = pd.to_numeric(df_chapters['churned_count'], errors='coerce').fillna(0).astype(int)
 
-        st.write("Columns found in cloud view:", df_chapters.columns.tolist())
-        st.write("Sample data row:", df_chapters.head(1).to_dict(orient='records'))
-        
         if df_chapters.empty:
             st.info("Views successfully loaded, but no matching activity logs exist yet. Showing skeleton metrics framework.")
             
