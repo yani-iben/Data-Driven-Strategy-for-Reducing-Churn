@@ -85,7 +85,7 @@ with tab2:
     st.markdown("Operational accountability tracking across distributed geographic chapters.")
     
     try:
-        df_chapters = pd.read_sql("SELECT * FROM view_chapter_performance;", con=engine)
+        df_chapters = pd.read_sql("SELECT * FROM view_chapter_performance;", con=get_db_engine())
         
         if df_chapters.empty:
             st.info("Views successfully loaded, but no matching activity logs exist yet. Showing skeleton metrics framework.")
