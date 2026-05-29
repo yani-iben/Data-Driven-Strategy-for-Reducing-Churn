@@ -16,10 +16,12 @@ st.markdown("---")
 def get_db_engine():
     if "postgres" in st.secrets:
         return create_engine(st.secrets["postgres"]["connection_string"])
-    
     return create_engine("postgresql+psycopg2://yani@localhost:5432/volunteer_analytics")
 
-engine = get_db_engine()
+def load_cohort_data():
+    engine = get_db_engine() 
+    query = "SELECT * FROM view_cohort_retention;"
+    return pd.read_sql(query, con=engine)
 
 # 3. TAB STRUCTURE
 tab1, tab2 = st.tabs(["Cohort Retention Heatmap Matrix", "Regional Chapter Performance Metrics"])
