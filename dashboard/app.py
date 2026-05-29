@@ -32,7 +32,7 @@ with tab1:
     st.markdown("This matrix tracks retention percentage decay over time. **Deep blue fields represent stable engagement; fading boxes expose structural churn points.**")
     
     try:
-        df_cohort = pd.read_sql("SELECT * FROM view_cohort_retention;", con=engine)
+        df_cohort = load_cohort_data()
         
         if df_cohort.empty:
             st.warning("Cohort view returned clean but empty. Verify fact ingestion logs.")
@@ -80,8 +80,6 @@ with tab1:
     except Exception as e:
         st.error(f"Execution Error loading cohort metrics: {e}")
 
-
-# Regional Chapter Performance Metrics
 with tab2:
     st.subheader("Cross-Sectional Chapter Performance Metrics")
     st.markdown("Operational accountability tracking across distributed geographic chapters.")
