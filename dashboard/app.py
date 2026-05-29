@@ -14,6 +14,9 @@ st.markdown("---")
 
 @st.cache_resource
 def get_db_engine():
+    if "postgres" in st.secrets:
+        return create_engine(st.secrets["postgres"]["connection_string"])
+    
     return create_engine("postgresql+psycopg2://yani@localhost:5432/volunteer_analytics")
 
 engine = get_db_engine()

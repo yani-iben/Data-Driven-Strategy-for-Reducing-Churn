@@ -5,7 +5,7 @@ import os
 # DATABASE CONNECTION CONFIGURATION
 # Format: postgresql://[username]:[password]@[host]:[port]/[database_name]
 # Modify 'postgres' and 'your_password' to match your local PostgreSQL credentials
-DB_URI = "postgresql+psycopg2://yani@localhost:5432/volunteer_analytics"
+DB_URI = "postgresql://neondb_owner:npg_JcbIXgPUo08i@ep-restless-shadow-aqh5n1ar.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require"
 
 print("Connecting to the database engine...")
 engine = create_engine(DB_URI)
