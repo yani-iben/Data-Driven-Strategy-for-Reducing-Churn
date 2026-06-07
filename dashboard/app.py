@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 # ==========================================
 st.set_page_config(
     page_title="Executive Volunteer Analytics Platform",
-    page_icon="📊",
+    page_icon=",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
