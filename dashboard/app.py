@@ -222,19 +222,14 @@ with tab2:
                 st.metric("Active Chapters Managed", len(df_chapters))
         with c2:
             with st.container(border=True):
-                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
                 st.metric("Mean Operational Output", f"{df_chapters['avg_hours_per_event'].mean():.1f} hrs/event")
-                st.markdown('</div>', unsafe_allow_html=True)
+                
         with c3:
             with st.container(border=True):
-                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
                 st.metric("System Engagement Index", f"{df_chapters['avg_engagement_score'].mean():.1f} / 10")
-            st.markdown('</div>', unsafe_allow_html=True)
         with c4:
             with st.container(border=True):
-                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
                 st.metric("At-Risk Headcount Volume", int(df_chapters["churned_count"].sum()), delta="Requires Attention", delta_color="inverse")
-                st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown("---")
         
