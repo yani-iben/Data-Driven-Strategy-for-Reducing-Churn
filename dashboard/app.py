@@ -2,20 +2,23 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from sqlalchemy import create_engine
 
-# 1. PROFESSIONAL PLATFORM CONFIGuration
+# ==========================================
+# 1. ENTERPRISE PLATFORM CONFIGURATION
+# ==========================================
 st.set_page_config(
-    page_title="Executive Volunteer Analytics",
+    page_title="Executive Volunteer Analytics Platform",
     page_icon="📊",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
-# Inject Clean Corporate CSS for Cards and Structure
 st.markdown("""
     <style>
         .block-container {padding-top: 1.5rem; padding-bottom: 1.5rem;}
         h1 {font-weight: 700; color: #0F172A; font-family: 'Helvetica Neue', sans-serif;}
-        h3 {font-weight: 600; color: #334155; margin-top: 1rem;}
+        h3 {font-weight: 600; color: #334155; margin-top: 1.25rem;}
         .metric-card {
             background-color: #FFFFFF; 
             padding: 1.25rem; 
@@ -27,50 +30,67 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("Strategic Volunteer Retention Command Center")
-st.markdown("Operational accountability tools tracking cohort lifecycles and regional risk profiles across distributed networks.")
+st.markdown("Operational accountability tracking across distributed geographic networks drawing natively from localized data warehouse pipelines.")
 st.markdown("---")
 
+
+# ==========================================
+# 2. ASYNCHRONOUS HIGH-PERFORMANCE DATA PIPELINE
+# ==========================================
 @st.cache_resource
 def get_db_engine():
+    """Establishes and caches a global database connection pool."""
     if "postgres" in st.secrets:
-        from sqlalchemy import create_engine
         return create_engine(st.secrets["postgres"]["connection_string"])
-    # Fallback placeholder for local orchestration safety
-    return None
+    # Local fallback option
+    return create_engine("postgresql+psycopg2://yani@localhost:5432/volunteer_analytics")
 
-def load_cohort_data():
+
+@st.cache_data(ttl=600)
+def load_cached_cohort_data():
+    """Fetches cohort records and maps types in-memory to prevent click lag."""
     engine = get_db_engine()
-    if engine:
-        return pd.read_sql("SELECT * FROM view_cohort_retention;", con=engine)
-    return pd.DataFrame()
+    df = pd.read_sql("SELECT * FROM view_cohort_retention;", con=engine)
+    if not df.empty:
+        df['retention_rate'] = pd.to_numeric(df['retention_rate'], errors='coerce')
+        df['months_since_joining'] = pd.to_numeric(df['months_since_joining'], errors='coerce')
+        df['parsed_date'] = pd.to_datetime(df['cohort_month'])
+        df['cohort_month'] = df['parsed_date'].dt.strftime('%Y-%m')
+        df['cohort_year'] = df['parsed_date'].dt.strftime('%Y')
+    return df
 
-def load_chapter_data():
+
+@st.cache_data(ttl=600)
+def load_cached_chapter_data():
+    """Fetches chapter records and handles clean numeric conversion schemas."""
     engine = get_db_engine()
-    if engine:
-        return pd.read_sql("SELECT * FROM view_chapter_performance;", con=engine)
-    return pd.DataFrame()
+    df = pd.read_sql("SELECT * FROM view_chapter_performance;", con=engine)
+    if not df.empty:
+        df['avg_hours_per_event'] = pd.to_numeric(df['avg_hours_per_event'], errors='coerce')
+        df['avg_engagement_score'] = pd.to_numeric(df['avg_engagement_score'], errors='coerce')
+        df['churned_count'] = pd.to_numeric(df['churned_count'], errors='coerce').fillna(0).astype(int)
+    return df
 
-df_cohort = load_cohort_data()
-df_chapters = load_chapter_data()
 
-if not df_cohort.empty:
-    df_cohort['retention_rate'] = pd.to_numeric(df_cohort['retention_rate'], errors='coerce')
-    df_cohort['months_since_joining'] = pd.to_numeric(df_cohort['months_since_joining'], errors='coerce')
-if not df_chapters.empty:
-    df_chapters['avg_hours_per_event'] = pd.to_numeric(df_chapters['avg_hours_per_event'], errors='coerce')
-    df_chapters['avg_engagement_score'] = pd.to_numeric(df_chapters['avg_engagement_score'], errors='coerce')
-    df_chapters['churned_count'] = pd.to_numeric(df_chapters['churned_count'], errors='coerce').fillna(0).astype(int)
+# Ingest datasets cleanly from cache functions
+df_cohort = load_cached_cohort_data()
+df_chapters = load_cached_chapter_data()
 
-# BUILD NAVIGATION STRUCTURE
+
+# ==========================================
+# 3. INTERACTIVE NAVIGATION LAYER
+# ==========================================
 tab1, tab2 = st.tabs(["Retention Milestones & Cohorts", "Chapter Accountability Logs"])
 
-# TAB 1: EXECUTIVE COHORT METRICS
 
+# ==========================================
+# TAB 1: EXECUTIVE COHORT METRICS
+# ==========================================
 with tab1:
     if df_cohort.empty:
-        st.warning("Awaiting production warehouse connection log verification pipelines.")
+        st.warning("Awaiting production data warehouse synchronization log validations.")
     else:
-        # Step 1: Compute Macro Milestones for Gauges/Cards
+        # Compute Macro Conversion Benchmarks
         m1_avg = df_cohort[df_cohort['months_since_joining'] == 1]['retention_rate'].mean()
         m3_avg = df_cohort[df_cohort['months_since_joining'] == 3]['retention_rate'].mean()
         m6_avg = df_cohort[df_cohort['months_since_joining'] == 6]['retention_rate'].mean()
@@ -80,93 +100,146 @@ with tab1:
         
         with col1:
             st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.metric(label="Onboarding Phase Retention (Month 1)", value=f"{m1_avg:.1f}%", delta="Target: >90%")
+            st.metric(label="Onboarding Phase Retention (Month 1)", value=f"{m1_avg:.1f}%")
             st.markdown('</div>', unsafe_allow_html=True)
             
         with col2:
             st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.metric(label="Mid-Cycle Commitment (Month 3)", value=f"{m3_avg:.1f}%", delta="-4.2% vs Last Quarter", delta_color="inverse")
+            st.metric(label="Mid-Cycle Commitment (Month 3)", value=f"{m3_avg:.1f}%")
             st.markdown('</div>', unsafe_allow_html=True)
             
         with col3:
             st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.metric(label="Long-Term Operational Stability (Month 6)", value=f"{m6_avg:.1f}%", delta="Stabilized")
+            st.metric(label="Long-Term Operational Stability (Month 6)", value=f"{m6_avg:.1f}%")
             st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown("---")
         
+        # Hierarchical Controls: Split selectors to filter cohort context
         st.subheader("Longitudinal Lifecycle Trends")
-        df_cohort['cohort_month'] = pd.to_datetime(df_cohort['cohort_month']).dt.strftime('%Y-%m')
-        all_cohorts = sorted(df_cohort['cohort_month'].unique())
+        filter_col1, filter_col2 = st.columns([1, 3])
         
-        # Interactive Filter Widget
-        selected_cohorts = st.multiselect(
-            "Select specific onboarding cohorts to compare against the system baseline:",
-            options=all_cohorts,
-            default=all_cohorts[:2] # Default to showing just the first two to keep canvas clean
+        with filter_col1:
+            available_years = sorted(df_cohort['cohort_year'].unique(), reverse=True)
+            selected_year = st.selectbox("Focus Year Context", options=["All Years"] + available_years)
+        
+        # Dynamically restrict multiselect options based on selected context year
+        if selected_year == "All Years":
+            filtered_cohort_options = sorted(df_cohort['cohort_month'].unique())
+        else:
+            filtered_cohort_options = sorted(df_cohort[df_cohort['cohort_year'] == selected_year]['cohort_month'].unique())
+            
+        with filter_col2:
+            selected_cohorts = st.multiselect(
+                "🎯 Select Cohort Batches to Benchmark:",
+                options=filtered_cohort_options,
+                default=filtered_cohort_options[:2]
+            )
+
+        # Build Rolling System-Wide Average Baseline Track
+        baseline_df = df_cohort.groupby('months_since_joining')['retention_rate'].mean().reset_index()
+        
+        fig_line = go.Figure()
+        
+        # Add Organizational Baseline Trace
+        fig_line.add_trace(
+            go.Scattergl(
+                x=baseline_df["months_since_joining"],
+                y=baseline_df["retention_rate"],
+                name="System Historical Baseline",
+                mode='lines',
+                line=dict(color='#94A3B8', width=4, dash='dash'),
+                opacity=0.8
+            )
         )
         
-        # Build optimized layout chart
+        # Map Hardware-Accelerated Interactive WebGL Curves
+        premium_palette = ["#3B82F6", "#EF4444", "#10B981", "#F59E0B", "#8B5CF6", "#EC4899"]
         filtered_cohort_df = df_cohort[df_cohort['cohort_month'].isin(selected_cohorts)]
         
-        fig_line = px.line(
-            filtered_cohort_df,
-            x="months_since_joining",
-            y="retention_rate",
-            color="cohort_month",
-            markers=True,
-            line_shape="spline", 
-            labels={"months_since_joining": "Months Active", "retention_rate": "Retention Rate (%)"},
-            title="Cohort Drop-Off Progression Curves (Clean Comparison Mapping)"
-        )
+        for i, cohort in enumerate(selected_cohorts):
+            cohort_data = filtered_cohort_df[filtered_cohort_df['cohort_month'] == cohort].sort_values('months_since_joining')
+            if not cohort_data.empty:
+                fig_line.add_trace(
+                    go.Scattergl(
+                        x=cohort_data["months_since_joining"],
+                        y=cohort_data["retention_rate"],
+                        name=f"Cohort {cohort}",
+                        mode='lines+markers',
+                        line=dict(color=premium_palette[i % len(premium_palette)], width=3, shape='spline'),
+                        marker=dict(size=7)
+                    )
+                )
         
         fig_line.update_layout(
+            title="Cohort Performance vs. Rolling Organizational Baseline",
+            xaxis_title="Timeline Progression (Months Elapsed)",
+            yaxis_title="Retention Percentage (%)",
             plot_bgcolor="rgba(0,0,0,0)",
-            xaxis=dict(showgrid=True, gridcolor="#E2E8F0"),
-            yaxis=dict(showgrid=True, gridcolor="#E2E8F0", range=[0, 105])
+            paper_bgcolor="rgba(0,0,0,0)",
+            hovermode="x unified",
+            xaxis=dict(showgrid=True, gridcolor="#F1F5F9", tickmode='linear', dtick=1),
+            yaxis=dict(showgrid=True, gridcolor="#F1F5F9", range=[0, 105]),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
         )
         st.plotly_chart(fig_line, use_container_width=True)
 
-        st.subheader("Detailed Retention Matrix Map")
+        st.markdown("---")
+        
+        # Rounded Analytical Matrix Map
+        st.subheader("Granular Retention Matrix Map")
         cohort_pivot = df_cohort.pivot(
             index='cohort_month', 
             columns='months_since_joining', 
             values='retention_rate'
-        ).round(0) 
+        ).round(0)
         
         fig_heatmap = px.imshow(
             cohort_pivot,
-            labels=dict(x="Months Since Onboarding", y="Cohort", color="Retention (%)"),
+            labels=dict(x="Months Active", y="Cohort Group", color="Retention (%)"),
             color_continuous_scale="Blues",
-            text_auto='.0f', 
+            text_auto='.0f',
             aspect="auto"
         )
-        fig_heatmap.update_layout(coloraxis_showscale=False) # Hides scale noise for executives
+        fig_heatmap.update_layout(coloraxis_showscale=False, plot_bgcolor="rgba(0,0,0,0)")
         st.plotly_chart(fig_heatmap, use_container_width=True)
 
 
+# ==========================================
 # TAB 2: CHAPTER METRICS & EXECUTIVE ALERTS
+# ==========================================
 with tab2:
     if df_chapters.empty:
-        st.info("Awaiting live database row synchronizations.")
+        st.info("Awaiting live cloud data warehouse synchronizations.")
     else:
         st.subheader("Distributed Asset Performance Log")
         
-        # High-Value Performance Cards
+        # KPI Rows
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Active Regions Managed", len(df_chapters["region"].unique()))
-        c2.metric("Mean Operational Output", f"{df_chapters['avg_hours_per_event'].mean():.1f} hrs/event")
-        c3.metric("System Engagement Index", f"{df_chapters['avg_engagement_score'].mean():.1f} / 10")
-        c4.metric("At-Risk Headcount Volume", int(df_chapters["churned_count"].sum()), delta="Requires Intervention", delta_color="inverse")
+        with c1:
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.metric("Active Regions Managed", len(df_chapters["region"].unique()))
+            st.markdown('</div>', unsafe_allow_html=True)
+        with c2:
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.metric("Mean Operational Output", f"{df_chapters['avg_hours_per_event'].mean():.1f} hrs/event")
+            st.markdown('</div>', unsafe_allow_html=True)
+        with c3:
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.metric("System Engagement Index", f"{df_chapters['avg_engagement_score'].mean():.1f} / 10")
+            st.markdown('</div>', unsafe_allow_html=True)
+        with c4:
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.metric("At-Risk Headcount Volume", int(df_chapters["churned_count"].sum()), delta="Requires Attention", delta_color="inverse")
+            st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown("---")
         
-        # Split layout view: Bar Chart on Left, Conditional DataFrame on Right
+        # Split Operational Panel Layout
         left_col, right_col = st.columns([1, 1])
         
         with left_col:
             st.markdown("### Regional Risk Profiles")
-            
             executive_slate_palette = ["#334155", "#64748B", "#94A3B8", "#CBD5E1"]
             
             fig_bar = px.bar(
@@ -189,10 +262,11 @@ with tab2:
             
         with right_col:
             st.markdown("### Operational Risk Matrix Leaderboard")
-            st.markdown("Metrics updated in real-time. Rows highlight automatically based on engagement risk thresholds.")
+            st.markdown("Metrics updated in real-time. Native column arrays monitor high-risk thresholds.")
             
             styled_df = df_chapters.sort_values(by="churned_count", ascending=False)
             
+            # Interactive Data Frame Editor with built-in visualization progress track
             st.data_editor(
                 styled_df,
                 column_config={
