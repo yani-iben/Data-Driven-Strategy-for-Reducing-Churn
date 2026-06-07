@@ -219,9 +219,7 @@ with tab2:
         c1, c2, c3, c4 = st.columns(4)
         with c1:
             with st.container(border=True):
-                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
                 st.metric("Active Chapters Managed", len(df_chapters))
-                st.markdown('</div>', unsafe_allow_html=True)
         with c2:
             with st.container(border=True):
                 st.markdown('<div class="metric-card">', unsafe_allow_html=True)
