@@ -96,23 +96,23 @@ with tab1:
         m6_avg = df_cohort[df_cohort['months_since_joining'] == 6]['retention_rate'].mean()
 
         st.subheader("System Health Milestones")
-        col1, col2, col3 = st.columns(3)
+        c1, c2, c3, c4 = st.columns(4)
         
-        with col1:
-            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.metric(label="Onboarding Phase Retention (Month 1)", value=f"{m1_avg:.1f}%")
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-        with col2:
-            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.metric(label="Mid-Cycle Commitment (Month 3)", value=f"{m3_avg:.1f}%")
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-        with col3:
-            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.metric(label="Long-Term Operational Stability (Month 6)", value=f"{m6_avg:.1f}%")
-            st.markdown('</div>', unsafe_allow_html=True)
-
+        with c1:
+            with st.container(border=True):
+                st.metric("Active Regions Managed", len(df_chapters["region"].unique()))
+                
+        with c2:
+            with st.container(border=True):
+                st.metric("Mean Operational Output", f"{df_chapters['avg_hours_per_event'].mean():.1f} hrs/event")
+                
+        with c3:
+            with st.container(border=True):
+                st.metric("System Engagement Index", f"{df_chapters['avg_engagement_score'].mean():.1f} / 10")
+                
+        with c4:
+            with st.container(border=True):
+                st.metric("At-Risk Headcount Volume", int(df_chapters["churned_count"].sum()), delta="Requires Attention", delta_color="inverse")
         st.markdown("---")
         
         # Hierarchical Controls: Split selectors to filter cohort context
