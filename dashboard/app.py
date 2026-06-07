@@ -218,21 +218,25 @@ with tab2:
         # KPI Rows
         c1, c2, c3, c4 = st.columns(4)
         with c1:
-            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.metric("Active Regions Managed", len(df_chapters["region"].unique()))
-            st.markdown('</div>', unsafe_allow_html=True)
+            with st.container(border=True):
+                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                st.metric("Active Chapters Managed", len(df_chapters))
+                st.markdown('</div>', unsafe_allow_html=True)
         with c2:
-            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.metric("Mean Operational Output", f"{df_chapters['avg_hours_per_event'].mean():.1f} hrs/event")
-            st.markdown('</div>', unsafe_allow_html=True)
+            with st.container(border=True):
+                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                st.metric("Mean Operational Output", f"{df_chapters['avg_hours_per_event'].mean():.1f} hrs/event")
+                st.markdown('</div>', unsafe_allow_html=True)
         with c3:
-            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.metric("System Engagement Index", f"{df_chapters['avg_engagement_score'].mean():.1f} / 10")
+            with st.container(border=True):
+                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                st.metric("System Engagement Index", f"{df_chapters['avg_engagement_score'].mean():.1f} / 10")
             st.markdown('</div>', unsafe_allow_html=True)
         with c4:
-            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.metric("At-Risk Headcount Volume", int(df_chapters["churned_count"].sum()), delta="Requires Attention", delta_color="inverse")
-            st.markdown('</div>', unsafe_allow_html=True)
+            with st.container(border=True):
+                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                st.metric("At-Risk Headcount Volume", int(df_chapters["churned_count"].sum()), delta="Requires Attention", delta_color="inverse")
+                st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown("---")
         
