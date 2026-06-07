@@ -131,7 +131,7 @@ with tab1:
             
         with filter_col2:
             selected_cohorts = st.multiselect(
-                "🎯 Select Cohort Batches to Benchmark:",
+                "Select Cohort Batches to Benchmark:",
                 options=filtered_cohort_options,
                 default=filtered_cohort_options[:2]
             )
@@ -166,7 +166,8 @@ with tab1:
                         y=cohort_data["retention_rate"],
                         name=f"Cohort {cohort}",
                         mode='lines+markers',
-                        line=dict(color=premium_palette[i % len(premium_palette)], width=3, shape='spline'),
+                        # 🚀 FIX: Removed shape='spline' to satisfy WebGL GPU requirements
+                        line=dict(color=premium_palette[i % len(premium_palette)], width=3), 
                         marker=dict(size=7)
                     )
                 )
